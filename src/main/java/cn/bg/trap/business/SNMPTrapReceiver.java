@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -22,7 +23,6 @@ import java.util.Vector;
  */
 @Service
 public class SNMPTrapReceiver implements CommandResponder {
-
     @Value("${port:162}")
     String port;
     @Value("${community:public}")
@@ -39,6 +39,8 @@ public class SNMPTrapReceiver implements CommandResponder {
     String priProtocol;
     @Value("${authProtocol:md5}")
     String authProtocol;
+    @Value("${charsetName:UTF-8}")
+    String charsetName;
 
     private OID priProtocolBean;
     private OID authProtocolBean;
@@ -46,8 +48,15 @@ public class SNMPTrapReceiver implements CommandResponder {
     private Snmp snmp = null;
     private int n = 0;
     private long start = -1;
+    private Charset charset;
 
     public SNMPTrapReceiver() {
+        try {
+            charset = Charset.forName(charsetName);
+        } catch (Exception e){
+            charset = Charset.forName("UTF-8");
+            System.out.println(e.getMessage());
+        }
     }
 
     public void run() {
@@ -147,24 +156,24 @@ public class SNMPTrapReceiver implements CommandResponder {
         if (pdu != null) {
             System.out.println("Variables:");
             pdu.getVariableBindings().forEach(varBind -> {
-                System.out.println(varBind.getOid()+" = "+getChinese(varBind.getVariable().toString()));
+                System.out.println(varBind.getOid() + " = " + getChinese(varBind.getVariable().toString()));
             });
         }
     }
 
-    public static String getChinese(String octetString){
-        try{
+    private String getChinese(String octetString) {
+        try {
             if (octetString.contains(":")) {
                 String[] temps = octetString.split(":");
                 byte[] bs = new byte[temps.length];
                 for (int i = 0; i < temps.length; i++) {
                     bs[i] = (byte) Integer.parseInt(temps[i], 16);
                 }
-                return new String(bs, "UTF-8");
+                return new String(bs, charset);
             } else {
                 return octetString;
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             return octetString;
         }
     }
