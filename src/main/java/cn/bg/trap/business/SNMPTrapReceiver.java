@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -49,6 +51,7 @@ public class SNMPTrapReceiver implements CommandResponder {
     private int n = 0;
     private long start = -1;
     private Charset charset;
+    private static final SimpleDateFormat datef = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public SNMPTrapReceiver() {
         try {
@@ -128,7 +131,7 @@ public class SNMPTrapReceiver implements CommandResponder {
                 return;
             }
         }
-        System.out.println("Received PDU......");
+        System.out.println(datef.format(new Date())+" Received PDU......");
         if (start < 0) {
             start = System.currentTimeMillis() - 1;
         }
