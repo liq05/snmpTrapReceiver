@@ -11,6 +11,7 @@ import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.ThreadPool;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -43,6 +44,8 @@ public class SNMPTrapReceiver implements CommandResponder {
     String authProtocol;
     @Value("${charsetName:UTF-8}")
     String charsetName;
+    @Value("${base64Decode:trie}")
+    Boolean base64Decode;
 
     private OID priProtocolBean;
     private OID authProtocolBean;
@@ -159,7 +162,12 @@ public class SNMPTrapReceiver implements CommandResponder {
         if (pdu != null) {
             System.out.println("Variables:");
             pdu.getVariableBindings().forEach(varBind -> {
-                System.out.println(varBind.getOid() + " = " + getChinese(varBind.getVariable().toString()));
+                String varStr = varBind.getVariable().toString();
+                if (base64Decode){
+                    byte[] var = varBind.getVariable().toString().getBytes();
+                    varStr = new String(Base64Utils.decode(var));
+                }
+                System.out.println(varBind.getOid() + " = " + getChinese(varStr));
             });
         }
     }
