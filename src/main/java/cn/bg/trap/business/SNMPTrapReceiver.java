@@ -44,7 +44,7 @@ public class SNMPTrapReceiver implements CommandResponder {
     String authProtocol;
     @Value("${charsetName:UTF-8}")
     String charsetName;
-    @Value("${base64Decode:trie}")
+    @Value("${base64Decode:true}")
     Boolean base64Decode;
 
     private OID priProtocolBean;
